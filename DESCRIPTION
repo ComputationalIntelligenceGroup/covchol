@@ -17,4 +17,5 @@ URL: https://github.com/irenecrsn/covchol
 BugReports: https://github.com/irenecrsn/covchol/issues
 RoxygenNote: 7.0.0
 Imports:
-	stats
+	stats,
+	graph
