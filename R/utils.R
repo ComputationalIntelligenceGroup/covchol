@@ -4,6 +4,7 @@
 #' @param coeffs Lower-triangular matrix of regression coefficients
 #' 
 #' @return Matrix inverse of the Cholesky factor
+#' @export
 chol_inv <- function(coeffs) {
 	o <- diag(nrow(coeffs))
 	dimnames(o) <- list(rownames(coeffs), colnames(coeffs))
