@@ -25,7 +25,15 @@ chol_inv <- function(coeffs) {
 	return(o)
 }
 
-fit_o <- function(dag, data) {
+#' Fit the Choleksy factor of the inverse covariance / concentration matrix 
+#' with linear regression
+#'
+#' @param dag Graph marking the sparsity of the factor
+#' @param data Data for fitting
+#'
+#' @return Cholesky factor  of the inverse covariance matrix
+#' @export
+fit_chol_conc <- function(dag, data) {
 
 	p <- graph::numNodes(dag)
 
@@ -44,7 +52,14 @@ fit_o <- function(dag, data) {
 	return(B)
 }
 
-fit_oinv <- function(dag, data) {
+#' Fit the Cholesky factor of the covariance matrix with linear regression
+#' 
+#' @param dag Graph marking the sparsity of the factor
+#' @param data Data for fitting
+#' 
+#' @return Cholesky factor of the covariance matrix
+#' @export
+fit_chol_cov <- function(dag, data) {
 	p <- graph::numNodes(dag)
 
 	B <- diag(p)
