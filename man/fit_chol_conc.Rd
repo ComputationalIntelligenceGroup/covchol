@@ -5,10 +5,10 @@
 \title{Fit the Choleksy factor of the inverse covariance / concentration matrix 
 with linear regression}
 \usage{
-fit_chol_conc(dag, data)
+fit_chol_conc(amat, data)
 }
 \arguments{
-\item{dag}{Graph marking the sparsity of the factor}
+\item{amat}{Adjacency matrix marking the sparsity of the factor}
 
 \item{data}{Data for fitting}
 }

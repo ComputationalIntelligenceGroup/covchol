@@ -3,3 +3,4 @@
 export(chol_inv)
 export(fit_chol_conc)
 export(fit_chol_cov)
+export(rlower)

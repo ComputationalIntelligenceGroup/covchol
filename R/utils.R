@@ -1,3 +1,23 @@
+#' Simulates a lower triangular matrix, possibly with a sparsity pattern
+#' 
+#' @param p Dimension of the matrix to be simulated
+#' @param d Density degree
+#' 
+#' @details Each entry in the lower triangle of the matrix is first assigned
+#' the result of a Bernouilli with parameter `d`. If a `1` was obtained, then
+#' the entry is assigned the result of a Uniform distribution on `[0.1, 1]`.
+#' 
+#' @return The simulated lower triangular matrix
+#' @export
+rlower <- function(p, d) {
+	B <- matrix(nrow = p, ncol = p, data = 0)
+	lower_tri_size <- p*(p - 1)/2
+	B[lower.tri(B)] <- stats::rbinom(n = lower_tri_size, size = 1, prob = d) * 
+		stats::runif(n = lower_tri_size, min = 0.1, max = 1)
+	
+	return(B)
+}
+
 #' Calculates the inverse of the Cholesky factor via the
 #' regression coefficients formula
 #' 
@@ -28,45 +48,38 @@ chol_inv <- function(coeffs) {
 #' Fit the Choleksy factor of the inverse covariance / concentration matrix 
 #' with linear regression
 #'
-#' @param dag Graph marking the sparsity of the factor
+#' @param amat Adjacency matrix marking the sparsity of the factor
 #' @param data Data for fitting
 #'
 #' @return Cholesky factor  of the inverse covariance matrix
 #' @export
-fit_chol_conc <- function(dag, data) {
+fit_chol_conc <- function(amat, data) {
 
-	p <- graph::numNodes(dag)
-
-	B <- diag(p)
-	colnames(B) <- rownames(B) <- 1:p
-	for (i in 2:p) {
-		dag_rev <- graph::reverseEdgeDirections(dag)
-		edge_list <- dag_rev@edgeL[[i]]$edges
-		parents <- edge_list[edge_list < i] #sobra
+	B <- amat
+	for (i in seq(nrow(B), from = 2)) {
+		parents <- which(B[i, ] != 0)
 		if (length(parents) > 0) {
-			model <- stats::lm(data[, i] ~ data[, parents])
-			B[i, parents] <- - model$coefficients[-1]
+			model <- stats::lm(data[, i] ~ data[, parents] - 1)
+			B[i, parents] <- - model$coefficients
 		}
 	}
+	diag(B) <- 1
 	
 	return(B)
 }
 
 #' Fit the Cholesky factor of the covariance matrix with linear regression
 #' 
-#' @param dag Graph marking the sparsity of the factor
+#' @param amat Adjacency matrix marking the sparsity of the factor
 #' @param data Data for fitting
 #' 
 #' @return Cholesky factor of the covariance matrix
 #' @export
-fit_chol_cov <- function(dag, data) {
-	p <- graph::numNodes(dag)
+fit_chol_cov <- function(amat, data) {
 
-	B <- diag(p)
-	colnames(B) <- rownames(B) <- 1:p
-	for (i in 2:p) {
-		dag_rev <- graph::reverseEdgeDirections(dag)
-		parents <- dag_rev@edgeL[[i]]$edges
+	B <- amat
+	for (i in seq(nrow(B), from = 2)) {
+		parents <- which(B[i, ] != 0)
 		for (j in 1:(i - 1)) {
 			if (length(parents) == 0) { 
 				B[i, j] <- 0
@@ -81,6 +94,7 @@ fit_chol_cov <- function(dag, data) {
 			}
 		}
 	}
+	diag(B) <- 1
 	
 	return(B)
 }

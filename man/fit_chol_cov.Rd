@@ -4,10 +4,10 @@
 \alias{fit_chol_cov}
 \title{Fit the Cholesky factor of the covariance matrix with linear regression}
 \usage{
-fit_chol_cov(dag, data)
+fit_chol_cov(amat, data)
 }
 \arguments{
-\item{dag}{Graph marking the sparsity of the factor}
+\item{amat}{Adjacency matrix marking the sparsity of the factor}
 
 \item{data}{Data for fitting}
 }
