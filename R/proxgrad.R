@@ -28,9 +28,9 @@ mll <- function(P, S){
 #'
 #' @return the estimated L matrix 
 #' @export
-proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-2,
+proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-4,
                       alpha = 0.2, beta = 0.5,
-                      maxIter = 1000, trace = 0,
+                      maxIter = 100, trace = 0,
                       lambda = 0, r = FALSE, h = TRUE){
   p <- ncol(Sigma)
   ixd <- 0:(p - 1) * (p) + 1:p ##index of diagonal elements
