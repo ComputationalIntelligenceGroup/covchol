@@ -6,7 +6,7 @@
 #' @importFrom stats var
 #' @export
 mll <- function(P, S){
-  -sum(S * P)
+  sum(S * P)
 }
 
 #' Proximal gradient sparse Cholesky factor
@@ -28,9 +28,9 @@ mll <- function(P, S){
 #'
 #' @return the estimated L matrix 
 #' @export
-proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-2,
+proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-4,
                       alpha = 0.2, beta = 0.5,
-                      maxIter = 1000, trace = 0,
+                      maxIter = 100, trace = 0,
                       lambda = 0, r = FALSE, h = TRUE){
   p <- ncol(Sigma)
   ixd <- 0:(p - 1) * (p) + 1:p ##index of diagonal elements
@@ -51,7 +51,7 @@ proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-2,
     }
     n <- n + 1
 
-    u <- 2 * forwardsolve(r = L, x = diag(p)) %*% Sigma %*% P
+    u <- 2 * forwardsolve(l = L, x = diag(p)) %*% Sigma %*% P
     diag(u) <- 0
     Lold <- L
     
@@ -112,6 +112,8 @@ llpathL <- function(Sigma, lambdas = NULL,
   results <- list()
   if (is.null(L0)){
     L0 <- t(chol(Sigma))
+    D <- diag(diag(L0))^2
+    diag(L0) <- 1
   }
   for (i in 1:length(lambdas)){
     results[[i]] <- proxgradL(Sigma, L0, D, eps, beta = 0.5, 
