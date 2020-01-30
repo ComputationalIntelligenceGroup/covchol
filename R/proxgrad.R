@@ -6,7 +6,7 @@
 #' @importFrom stats var
 #' @export
 mll <- function(P, S){
-  -determinant(P, logarithm = TRUE)$modulus + sum(S * P)
+  -sum(S * P)
 }
 
 #' Proximal gradient sparse Cholesky factor
@@ -40,7 +40,7 @@ proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-4,
   a <- Inf
   n <- 0
   S <- L %*% D %*% t(L)
-  P <- solve(S)
+  P <- chol2inv(sqrt(D) %*% t(L))
   tk <- 1
   u <- rep(0, length(ix))
   f <- mll(P = P, S = Sigma)
@@ -50,9 +50,8 @@ proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-4,
       ixnd <- ix[! ix %in% ixd ] ## not diagonal elements
     }
     n <- n + 1
-    gradSigma <- P %*% Sigma %*% P - P 
 
-    u <- 2 * gradSigma %*% D %*% t(L)
+    u <- 2 * forwardsolve(r = L, x = diag(p)) %*% Sigma %*% P
     diag(u) <- 0
     Lold <- L
     
@@ -72,7 +71,7 @@ proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-4,
       
       ### new S
       S <- L %*% D %*% t(L)
-      P <- solve(S)
+      P <- chol2inv(sqrt(D) %*% t(L))
       fnew <- mll(P, Sigma) + lambda * sum(abs(L[ixnd]))
       alph <- alph * beta
     }
