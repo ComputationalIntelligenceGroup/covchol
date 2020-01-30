@@ -102,7 +102,7 @@ proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-2,
 #' @param r as in proxgradL
 #' @param h as in proxgradL
 #' @export
-llBpath <- function(Sigma, lambdas = NULL, 
+llpathL <- function(Sigma, lambdas = NULL, 
                     D = diag(nrow(Sigma)),
                     L0 = NULL,
                     eps = 1e-8, maxIter = 1000, 
