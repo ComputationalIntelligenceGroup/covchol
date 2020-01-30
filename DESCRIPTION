@@ -15,7 +15,7 @@ Description: Exploration of the Cholesky factor of a covariance matrix.
 License: GPL (>=2)
 URL: https://github.com/irenecrsn/covchol
 BugReports: https://github.com/irenecrsn/covchol/issues
-RoxygenNote: 7.0.0
+RoxygenNote: 7.0.2
 Imports:
 	stats
 Suggests: 

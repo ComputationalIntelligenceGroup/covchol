@@ -3,4 +3,8 @@
 export(chol_inv)
 export(fit_chol_conc)
 export(fit_chol_cov)
+export(llpathL)
+export(mll)
+export(proxgradL)
 export(rlower)
+importFrom(stats,var)

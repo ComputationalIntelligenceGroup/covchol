@@ -88,3 +88,38 @@ proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-2,
   }
   return(L)
 }
+
+
+
+#' Path of L estimates (log-lik)
+#' 
+#' @param Sigma empirical covariance matrix
+#' @param lambdas increasing sequence of lambdas
+#' @param D the known noise matrix 
+#' @param L0 initial L matrix
+#' @param eps convergence criteria
+#' @param maxIter maximum iterations for each proximal gradient
+#' @param r as in proxgradL
+#' @param h as in proxgradL
+#' @export
+llpathL <- function(Sigma, lambdas = NULL, 
+                    D = diag(nrow(Sigma)),
+                    L0 = NULL,
+                    eps = 1e-8, maxIter = 1000, 
+                    r = FALSE, h = TRUE){
+  if (is.null(lambdas)) {
+    lambdas = seq(0, max(diag(Sigma)), length = 10)
+  }
+  results <- list()
+  if (is.null(L0)){
+    L0 <- t(chol(Sigma))
+  }
+  for (i in 1:length(lambdas)){
+    results[[i]] <- proxgradL(Sigma, L0, D, eps, beta = 0.5, 
+                                maxIter = maxIter, lambda = lambdas[i], r = r, 
+                              h = h )
+    L0 <- results[[i]]
+    
+  }
+  return(results)
+} 
