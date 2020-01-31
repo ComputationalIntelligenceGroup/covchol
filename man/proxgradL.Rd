@@ -44,7 +44,11 @@ at every iteration}
 \item{h}{logical if TRUE only the non-zero entries of L will be updated}
 }
 \value{
-the estimated L matrix
+A list with
+        * L 
+        * Sigma = LDL^t
+        * niter 
+        * diff
 }
 \description{
 Proximal gradient sparse Cholesky factor

@@ -26,7 +26,11 @@ mll <- function(P, S){
 #'          at every iteration
 #' @param h logical if TRUE only the non-zero entries of L will be updated
 #'
-#' @return the estimated L matrix 
+#' @return A list with
+#'         * L 
+#'         * Sigma = LDL^t
+#'         * niter 
+#'         * diff
 #' @export
 proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-4,
                       alpha = 0.2, beta = 0.5,
@@ -85,7 +89,7 @@ proxgradL <- function(Sigma, L, D = diag(ncol(Sigma)), eps =  1e-4,
   if (trace > 0){
     message("Stop after ", n, " iterations, with ||diff||=", signif(a))
   }
-  return(L)
+  return(list(L = L, Sigma = S, diff = a, niter = n))
 }
 
 
@@ -119,7 +123,7 @@ llpathL <- function(Sigma, lambdas = NULL,
     results[[i]] <- proxgradL(Sigma, L0, D, eps, beta = 0.5, 
                                 maxIter = maxIter, lambda = lambdas[i], r = r, 
                               h = h )
-    L0 <- results[[i]]
+    L0 <- results[[i]]$L
     
   }
   return(results)
