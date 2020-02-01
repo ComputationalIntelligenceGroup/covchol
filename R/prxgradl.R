@@ -24,7 +24,6 @@ prxgradl <- function(Sigma, L, eps =  1e-2,
                         alpha = 0.5, 
                         maxIter = 100, 
                         lambda = 0){
-  ### AHORA FUNCIONA SOLO CON D = diag(p)
   out <- .Fortran("PRXGRDL",as.integer(ncol(Sigma)), as.double(Sigma), 
                   as.double(L), as.double(lambda), as.double(eps),
                   as.double(alpha), as.integer(maxIter),
