@@ -2,9 +2,12 @@
 % Please edit documentation in R/prxgradl.R
 \name{prxgradchol}
 \alias{prxgradchol}
+\alias{cholpath}
 \title{Penalized likelihood estimation of Cholesky factor}
 \usage{
 prxgradchol(Sigma, L, eps = 0.01, alpha = 0.5, maxIter = 100, lambda = 0)
+
+cholpath(Sigma, lambdas = NULL, eps = 1e-08, maxIter = 1000)
 }
 \arguments{
 \item{Sigma}{the empirical covariance matrix}
@@ -18,6 +21,8 @@ prxgradchol(Sigma, L, eps = 0.01, alpha = 0.5, maxIter = 100, lambda = 0)
 \item{maxIter}{the maximum number of iterations}
 
 \item{lambda}{penalization coefficient}
+
+\item{lambdas}{increasing sequence of lambdas}
 }
 \value{
 a list with the output of the optimization:
@@ -33,4 +38,8 @@ a list with the output of the optimization:
 Optimize the  matrix of a continuous Lyapunov 
 Gaussian graphical model (CLGGM) using proximal gradient. 
 \deqn{\hat{L} = \arg \min_{L} 2\log(det(L)) + tr(L^{-t}L^{-1} \Sigma)}
+}
+\details{
+\code{cholpath} returns the path of regularized estimator on a sequence of 
+\code{lambda} parameters
 }

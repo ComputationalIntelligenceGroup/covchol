@@ -4,6 +4,9 @@
 #' Gaussian graphical model (CLGGM) using proximal gradient. 
 #' \deqn{\hat{L} = \arg \min_{L} 2\log(det(L)) + tr(L^{-t}L^{-1} \Sigma)}
 #' 
+#' \code{cholpath} returns the path of regularized estimator on a sequence of 
+#' \code{lambda} parameters
+#' 
 #' @param Sigma the empirical covariance matrix
 #' @param L initial cholesky factor
 #' @param eps convergence threshold for the proximal gradient
@@ -34,4 +37,24 @@ prxgradchol <- function(Sigma, L, eps =  1e-2,
   out$L <- matrix(nrow = out$N, out$L)
   out$Sigma <- matrix(nrow = out$N, out$Sigma)
   return(out)
+}
+
+
+#' @rdname prxgradchol
+#' 
+#' @param lambdas increasing sequence of lambdas
+#' @export
+cholpath <- function(Sigma, lambdas = NULL, 
+                    eps = 1e-8, maxIter = 1000){
+  L0 <- t(chol(Sigma))
+  if (is.null(lambdas)) {
+    lambdas = seq(0, max(diag(Sigma)), length = 10)
+  }
+  results <- list()
+  for (i in 1:length(lambdas)){
+    results[[i]] <- prxgradchol(Sigma, L0, eps, 
+                              maxIter = maxIter, lambda = lambdas[i])
+    L0 <- results[[i]]$L
+  }
+  return(results)
 }
