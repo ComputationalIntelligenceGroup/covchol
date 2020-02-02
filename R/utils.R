@@ -51,7 +51,7 @@ chol_inv <- function(coeffs) {
 #' @param amat Adjacency matrix marking the sparsity of the factor
 #' @param data Data for fitting
 #'
-#' @return Cholesky factor  of the inverse covariance matrix
+#' @return Cholesky factor of the inverse covariance matrix
 #' @export
 fit_chol_conc <- function(amat, data) {
 
@@ -59,8 +59,8 @@ fit_chol_conc <- function(amat, data) {
 	for (i in seq(nrow(B), from = 2)) {
 		parents <- which(B[i, ] != 0)
 		if (length(parents) > 0) {
-			model <- stats::lm(data[, i] ~ data[, parents] - 1)
-			B[i, parents] <- - model$coefficients
+			model <- stats::lm(data[, i] ~ data[, parents])
+			B[i, parents] <- - model$coefficients[-1]
 		}
 	}
 	diag(B) <- 1
@@ -86,11 +86,11 @@ fit_chol_cov <- function(amat, data) {
 			} else if (parents[length(parents)] < j) {
 				B[i, j] <- 0
 			} else if (parents[length(parents)] == j) {
-				model <- stats::lm(data[, i] ~ data[, parents] - 1)
+				model <- stats::lm(data[, i] ~ data[, parents])
 				B[i, j] <- model$coefficients[length(model$coefficients)]
 			} else {
-				model <- stats::lm(data[, i] ~ data[, 1:j] - 1)
-				B[i, j] <- model$coefficients[j]
+				model <- stats::lm(data[, i] ~ data[, 1:j])
+				B[i, j] <- model$coefficients[j + 1]
 			}
 		}
 	}
