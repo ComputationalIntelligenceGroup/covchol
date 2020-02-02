@@ -7,10 +7,10 @@
 */
 
 /* .Fortran calls */
-extern void F77_NAME(prxgrdl)(void *, void *, void *, void *, void *, void *, void *);
+extern void F77_NAME(prxgrd)(void *, void *, void *, void *, void *, void *, void *);
 
 static const R_FortranMethodDef FortranEntries[] = {
-    {"prxgrdl", (DL_FUNC) &F77_NAME(prxgrdl), 7},
+    {"prxgrd", (DL_FUNC) &F77_NAME(prxgrd), 7},
     {NULL, NULL, 0}
 };
 

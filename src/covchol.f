@@ -1,10 +1,10 @@
-      SUBROUTINE PRXGRDL(N,SIGMA,L,LAMBDA,EPS,ALPHA,MAXITR)
+      SUBROUTINE PRXGRD(N,SIGMA,L,LAMBDA,EPS,ALPHA,MAXITR)
       INTEGER N,MAXITR
       DOUBLE PRECISION SIGMA(N,N),L(N,N),LAMBDA,EPS,ALPHA      
 c      
 c     internal variables
       INTEGER I,J,ITR
-      DOUBLE PRECISION F,FNEW,TMP(N,N),GRD(N,N),
+      DOUBLE PRECISION F,FNEW,TMP(N,N),GRD(N,N), D(N),
      *                 ONE, ZERO, STEP 
       ITR = 0
       ONE = 1.0
@@ -24,12 +24,12 @@ c     compute TMP = L^(-1) * SIGMA * L^(-t)
 c     compute tr(TMP) + LAMBDA * ||L||_1,off
       F = 0
       DO 30 J=1,N-1
-         F = F + TMP(J,J)  
+         F = F + TMP(J,J) + 2 * LOG(L(J,J)) 
          DO 25 I=J+1, N
             F = F + LAMBDA * ABS(L(I,J))
   25     CONTINUE
   30  CONTINUE
-      F = F + TMP(N,N)
+      F = F + TMP(N,N) + 2* LOG(L(N,N))
 c     main loop here, increase iteration counter
  500  CONTINUE      
       ITR = ITR + 1
@@ -45,7 +45,9 @@ c     copy old L before starting line search
          DO 80 I = J + 1,N
              L(J,I) = L(I,J)
   80     CONTINUE          
+             D(J) = L(J,J)
   90  CONTINUE 
+             D(N) = L(N,N)
       STEP = 1
 c     line search loop here
   600 CONTINUE     
@@ -54,7 +56,9 @@ c     gradient step
          DO 100 I = J + 1,N
             L(I,J) = L(J,I) + 2 * STEP * GRD(I,J) 
   100    CONTINUE
+            L(J,J) = D(J) + 2 * STEP * GRD(J,J)
   110 CONTINUE
+            L(N,N) = D(N) + 2 * STEP * GRD(N,N)
 c     soft thresholding
       DO 130 J =1,N - 1
          DO 120 I=J + 1,N
@@ -73,12 +77,12 @@ c     soft thresholding
 c     compute FNW, objective function in new L
       FNW = 0 
       DO 140 J=1,N - 1
-         FNW = FNW + TMP(J,J) 
+         FNW = FNW + TMP(J,J) + 2 * LOG(L(J,J)) 
          DO 135 I=J+1, N
             FNW = FNW + LAMBDA * ABS(L(I,J))
  135     CONTINUE
  140  CONTINUE
-      FNW = FNW + TMP(N,N) 
+      FNW = FNW + TMP(N,N) + 2 * LOG(L(N,N))
 c     line search with descent condition
       IF (FNW .GT. F) THEN
          STEP = STEP * ALPHA

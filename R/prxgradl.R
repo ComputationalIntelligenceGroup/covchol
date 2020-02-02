@@ -2,14 +2,15 @@
 #' 
 #' Optimize the  matrix of a continuous Lyapunov 
 #' Gaussian graphical model (CLGGM) using proximal gradient. 
-#' \deqn{\hat{L} = \arg \min_L \log + \lambda||L||_1}
+#' \deqn{\hat{L} = \arg \min_{L} 2\log(det(L)) + tr(L^{-t}L^{-1} \Sigma)}
 #' 
-#' @param Sigma the observed covariance matrix
-#' @param L an initial L matrix
+#' @param Sigma the empirical covariance matrix
+#' @param L initial cholesky factor
 #' @param eps convergence threshold for the proximal gradient
-#' @param alpha Beck and Tabulle line search rate
+#' @param alpha line search rate
 #' @param maxIter the maximum number of iterations
 #' @param lambda penalization coefficient 
+#' 
 #' @return a list with the output of the optimization:
 #' 
 #' * \code{N}
@@ -20,11 +21,11 @@
 #' * \code{iter} number of iterations
 #' @useDynLib covchol
 #' @export
-prxgradl <- function(Sigma, L, eps =  1e-2,
+prxgradchol <- function(Sigma, L, eps =  1e-2,
                         alpha = 0.5, 
                         maxIter = 100, 
                         lambda = 0){
-  out <- .Fortran("PRXGRDL",as.integer(ncol(Sigma)), as.double(Sigma), 
+  out <- .Fortran("PRXGRD",as.integer(ncol(Sigma)), as.double(Sigma), 
                   as.double(L), as.double(lambda), as.double(eps),
                   as.double(alpha), as.integer(maxIter),
                   PACKAGE = "covchol")
