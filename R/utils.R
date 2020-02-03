@@ -93,18 +93,9 @@ fit_chol_cov <- function(amat, data) {
 	B <- amat
 	for (i in seq(nrow(B), from = 2)) {
 		parents <- which(B[i, ] != 0)
-		for (j in 1:(i - 1)) {
-			if (length(parents) == 0) { 
-				B[i, j] <- 0
-			} else if (parents[length(parents)] < j) {
-				B[i, j] <- 0
-			} else if (parents[length(parents)] == j) {
-				model <- stats::lm(data[, i] ~ data[, parents])
-				B[i, j] <- model$coefficients[length(model$coefficients)]
-			} else {
-				model <- stats::lm(data[, i] ~ data[, 1:j])
-				B[i, j] <- model$coefficients[j + 1]
-			}
+		for (j in parents) {
+			model <- stats::lm(data[, i] ~ data[, 1:j])
+			B[i, j] <- model$coefficients[j + 1]
 		}
 	}
 	diag(B) <- 1

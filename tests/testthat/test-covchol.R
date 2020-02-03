@@ -28,8 +28,8 @@ test_that("regression estimation of concentration is correct", {
 test_that("estimation of covariance is correct", {
 	p <- 10; d <- 0.5; N <- 10000
 	
-	L <- rlower(p = p, d = d)
-	diag(L) <- 1
+	B <- rlower(p = p, d = d)
+	L <- diag(p) + B
  	S <- L %*% t(L)
  	data <- MASS::mvrnorm(n = N, mu = rep(0, p), Sigma = S)
  	
@@ -41,7 +41,7 @@ test_that("estimation of covariance is correct", {
  										 maxIter = 1000, eps = 1e-15)
  	expect_equal(norm(L_chol - L_lik$L), 0)
  	
- 	L_reg <- fit_chol_cov(amat = L, data = data)
+ 	L_reg <- fit_chol_cov(amat = B, data = data)
  	ldl <- ldlfromchol(L = L_lik$L)
  	expect_equal(norm(L_reg - ldl$L), 0)
 })
