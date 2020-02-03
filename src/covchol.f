@@ -5,7 +5,7 @@ c
 c     internal variables
       INTEGER I,J,ITR
       DOUBLE PRECISION F,FNEW,TMP(N,N),GRD(N,N), D(N),
-     *                 ONE, ZERO, STEP 
+     *                 ONE, ZERO, STEP, DIFF 
       ITR = 0
       ONE = 1.0
       ZERO = 0.0
@@ -75,30 +75,51 @@ c     soft thresholding
       CALL DTRSM("L","L","N","N",N,N,ONE,L,N,TMP,N) 
       CALL DTRSM("R","L","T","N",N,N,ONE,L,N,TMP,N) 
 c     compute FNW, objective function in new L
+c      DIFF = 0
       FNW = 0 
       DO 140 J=1,N - 1
          FNW = FNW + TMP(J,J) + 2 * LOG(L(J,J)) 
          DO 135 I=J+1, N
             FNW = FNW + LAMBDA * ABS(L(I,J))
+c            DIFF = DIFF + ((L(I,J) - L(J,I)) ** 2) / (2 * STEP) +  
+c     *             (L(I,J) - L(J,I)) * GRD(I,J) 
  135     CONTINUE
+c            DIFF = DIFF + ((L(J,J) - D(J)) ** 2) / (2 * STEP) + 
+c     *             (L(J,J) - D(J)) * GRD(J,J) 
  140  CONTINUE
+c            DIFF = DIFF + ((L(N,N) - D(N)) ** 2) / (2 * STEP) + 
+c     *             (L(N,N) - D(N)) * GRD(N,N) 
       FNW = FNW + TMP(N,N) + 2 * LOG(L(N,N))
 c     line search with descent condition
       IF (FNW .GT. F) THEN
+         IF (STEP .LT. EPS) THEN
+            ALPHA = F
+            EPS = (F - FNW) / ABS(F)   
+            MAXITR = ITR
+            DO 160 J=1,N-1
+               DO 150 I =J + 1,N
+                  L(I,J) = L(J,I)
+                  L(J,I) = 0
+ 150           CONTINUE   
+               L(J,J) = D(J)
+ 160        CONTINUE 
+            L(N,N) = D(N)
+            GOTO 900
+         ENDIF
          STEP = STEP * ALPHA
          GOTO 600
       ENDIF
 c     check stopping criteria
       IF (((F - FNW) / ABS(F) .LE. EPS) .OR.  (ITR .GE. MAXITR)) THEN
 c     terminate, clean L and save additional outputs
-         ALPHA = STEP 
+         ALPHA = FNW 
          EPS = (F - FNW) / ABS(F)   
          MAXITR = ITR
-         DO 160 J=1,N-1
-            DO 150 I =J + 1,N
+         DO 180 J=1,N-1
+            DO 170 I =J + 1,N
                L(J,I) = 0
- 150        CONTINUE   
- 160     CONTINUE   
+ 170        CONTINUE   
+ 180     CONTINUE   
          GOTO 900 
       ENDIF  
 c     update value of objective function and repeat

@@ -54,7 +54,7 @@ cholpath <- function(Sigma, lambdas = NULL,
   for (i in 1:length(lambdas)){
     results[[i]] <- prxgradchol(Sigma, L0, eps, 
                               maxIter = maxIter, lambda = lambdas[i])
-    L0 <- results[[i]]$L
+    #L0 <- results[[i]]$L
   }
   return(results)
 }
