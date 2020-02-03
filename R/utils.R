@@ -1,3 +1,16 @@
+#' Returns LDL factorization from lower Cholesky factor
+#' 
+#' @param L
+#' 
+#' @return a list with the L and D factors
+#' @export
+ldlfromchol <- function(L) {
+	L_new <- L %*% diag(1/diag(L))
+	D <- diag(diag(L)^2)
+	
+	return(list(L = L_new, D = D))
+}
+
 #' Simulates a lower triangular matrix, possibly with a sparsity pattern
 #' 
 #' @param p Dimension of the matrix to be simulated

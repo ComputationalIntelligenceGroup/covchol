@@ -25,19 +25,23 @@ test_that("regression estimation of concentration is correct", {
 	expect_equal(norm(U_reg - U_ggm$Ahat), 0)
 })
 
-# test_that("estimation of covariance is correct", {
-# 	p <- 10; d <- 0.5; N <- 10000
-# 	
-# 	L <- rlower(p = p, d = d)
-# 	diag(L) <- 1
-# 	S <- L %*% t(L)
-# 	data <- MASS::mvrnorm(n = N, mu = rep(0, p), Sigma = S)
-# 	
-# 	L_reg <- fit_chol_cov(amat = L, data = data)
-# 	L_lik <- prxgradchol(Sigma = cov(data), L = L_reg,
-# 										 lambda = 0, 
-# 										 maxIter = 1000, eps = 1e-15)
-# 	Lest <- L_lik$L
-# 	diag(Lest) <- 1
-# 	expect_equal(norm(L_reg - Lest), 0)
-# })
+test_that("estimation of covariance is correct", {
+	p <- 10; d <- 0.5; N <- 10000
+	
+	L <- rlower(p = p, d = d)
+	diag(L) <- 1
+ 	S <- L %*% t(L)
+ 	data <- MASS::mvrnorm(n = N, mu = rep(0, p), Sigma = S)
+ 	
+ 	S_data <- cov(data)
+ 	L_chol <- t(chol(S_data))
+ 	
+ 	L_lik <- prxgradchol(Sigma = S_data, L = L_chol,
+ 										 lambda = 0, 
+ 										 maxIter = 1000, eps = 1e-15)
+ 	expect_equal(norm(L_chol - L_lik$L), 0)
+ 	
+ 	L_reg <- fit_chol_cov(amat = L, data = data)
+ 	ldl <- ldlfromchol(L = L_lik$L)
+ 	expect_equal(norm(L_reg - ldl$L), 0)
+})
