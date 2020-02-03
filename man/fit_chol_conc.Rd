@@ -13,7 +13,7 @@ fit_chol_conc(amat, data)
 \item{data}{Data for fitting}
 }
 \value{
-Cholesky factor  of the inverse covariance matrix
+Cholesky factor of the inverse covariance matrix
 }
 \description{
 Fit the Choleksy factor of the inverse covariance / concentration matrix 
