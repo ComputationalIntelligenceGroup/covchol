@@ -33,15 +33,14 @@ test_that("estimation of covariance is correct", {
  	S <- L %*% t(L)
  	data <- MASS::mvrnorm(n = N, mu = rep(0, p), Sigma = S)
  	
- 	S_data <- cov(data)
- 	L_chol <- t(chol(S_data))
- 	
- 	L_lik <- prxgradchol(Sigma = S_data, L = L_chol,
+ 	reg <- fit_ldl_cov(amat = B, data = data)
+ 	L_chol <- cholfromldl(L = reg$L, D = reg$D)
+ 	L_lik <- prxgradchol(Sigma = cov(data), L = L_chol,
  										 lambda = 0, 
  										 maxIter = 1000, eps = 1e-15)
- 	expect_equal(norm(L_chol - L_lik$L), 0)
+ 	expect_equal(norm(L_lik$L - L_chol), 0, tolerance = 1e-2)
  	
- 	L_reg <- fit_chol_cov(amat = B, data = data)
  	ldl <- ldlfromchol(L = L_lik$L)
- 	expect_equal(norm(L_reg - ldl$L), 0)
+ 	expect_equal(norm(reg$L - ldl$L), 0, tolerance = 1e-2)
+ 	expect_equal(norm(reg$D - ldl$D), 0, tolerance = 1e-2)
 })

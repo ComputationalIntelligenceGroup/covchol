@@ -7,7 +7,7 @@
 ldlfromchol(L)
 }
 \arguments{
-\item{L}{}
+\item{L}{Lower Cholesky factor}
 }
 \value{
 a list with the L and D factors

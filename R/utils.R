@@ -1,6 +1,6 @@
 #' Returns LDL factorization from lower Cholesky factor
 #' 
-#' @param L
+#' @param L Lower Cholesky factor
 #' 
 #' @return a list with the L and D factors
 #' @export
@@ -9,6 +9,19 @@ ldlfromchol <- function(L) {
 	D <- diag(diag(L)^2)
 	
 	return(list(L = L_new, D = D))
+}
+
+#' Returns Cholesky factorization from ldl
+#' 
+#' @param L L factor in LDL^t decomposition
+#' @param D D factor in LDL^t decomposition
+#' 
+#' @return The lower Cholesky factor
+#' @export
+cholfromldl <- function(L,  D) {
+	L_new <- L %*% sqrt(D)
+	
+	return(L_new)
 }
 
 #' Simulates a lower triangular matrix, possibly with a sparsity pattern
@@ -88,8 +101,9 @@ fit_chol_conc <- function(amat, data) {
 #' 
 #' @return Cholesky factor of the covariance matrix
 #' @export
-fit_chol_cov <- function(amat, data) {
+fit_ldl_cov <- function(amat, data) {
 
+	D <- numeric(ncol(amat))
 	B <- amat
 	for (i in seq(nrow(B), from = 2)) {
 		parents <- which(B[i, ] != 0)
@@ -97,9 +111,12 @@ fit_chol_cov <- function(amat, data) {
 			model <- stats::lm(data[, i] ~ data[, 1:j])
 			B[i, j] <- model$coefficients[j + 1]
 		}
+		model <- summary(stats::lm(data[, i] ~ data[, seq(i - 1)]))
+		D[i] <- model$sigma^2
 	}
+	D[1] <- var(data[, 1])
 	diag(B) <- 1
 	
-	return(B)
+	return(list(L = B, D = diag(D)))
 }
 
