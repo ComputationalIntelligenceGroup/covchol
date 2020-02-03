@@ -114,7 +114,7 @@ fit_ldl_cov <- function(amat, data) {
 		model <- summary(stats::lm(data[, i] ~ data[, seq(i - 1)]))
 		D[i] <- model$sigma^2
 	}
-	D[1] <- var(data[, 1])
+	D[1] <- stats::var(data[, 1])
 	diag(B) <- 1
 	
 	return(list(L = B, D = diag(D)))
