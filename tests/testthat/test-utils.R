@@ -11,15 +11,15 @@ test_that("ldl from Cholesky is correct", {
 	
 	B <- rlower(p = p, d = d)
 	L <- diag(p) + B
-	D <- diag(runif(p, 0.1, 1))
+	D <- runif(p, 0.1, 1)
 	
-	S <- L %*% D %*% t(L)
+	S <- L %*% diag(D) %*% t(L)
 	L_chol <- t(chol(S))
 	
 	res <- ldlfromchol(L = L_chol)
 	
 	expect_equal(norm(res$L - L), 0)
-	expect_equal(norm(res$D - D), 0)
+	expect_equal(sum(abs(res$D - D)), 0)
 })
 
 test_that("Cholesky form ldl is correct", {
@@ -27,10 +27,10 @@ test_that("Cholesky form ldl is correct", {
 	
 	B <- rlower(p = p, d = d)
 	L <- diag(p) + B
-	D <- diag(runif(p, 0.1, 1))
+	D <- runif(p, 0.1, 1)
 	
 	res <- cholfromldl(L = L,  D = D)
-	S <- L %*% D %*% t(L)
+	S <- L %*% diag(D) %*% t(L)
 	L_chol <- t(chol(S))
 	
 	expect_equal(norm(res - L_chol), 0)

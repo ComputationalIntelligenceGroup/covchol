@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{fit_ldl_cov}
 \alias{fit_ldl_cov}
-\title{Fit the Cholesky factor of the covariance matrix with linear regression}
+\title{Fit the ldl factor of the covariance matrix with linear regression}
 \usage{
 fit_ldl_cov(amat, data)
 }
@@ -12,8 +12,8 @@ fit_ldl_cov(amat, data)
 \item{data}{Data for fitting}
 }
 \value{
-Cholesky factor of the covariance matrix
+A list with the ldl factors
 }
 \description{
-Fit the Cholesky factor of the covariance matrix with linear regression
+Fit the ldl factor of the covariance matrix with linear regression
 }

@@ -2,11 +2,11 @@
 #' 
 #' @param L Lower Cholesky factor
 #' 
-#' @return a list with the L and D factors
+#' @return a list with the L and D factors (D being a vector)
 #' @export
 ldlfromchol <- function(L) {
 	L_new <- L %*% diag(1/diag(L))
-	D <- diag(diag(L)^2)
+	D <- diag(L)^2
 	
 	return(list(L = L_new, D = D))
 }
@@ -14,12 +14,12 @@ ldlfromchol <- function(L) {
 #' Returns Cholesky factorization from ldl
 #' 
 #' @param L L factor in LDL^t decomposition
-#' @param D D factor in LDL^t decomposition
+#' @param D D factor (diagonal vector) in LDL^t decomposition
 #' 
 #' @return The lower Cholesky factor
 #' @export
 cholfromldl <- function(L,  D) {
-	L_new <- L %*% sqrt(D)
+	L_new <- L %*% diag(sqrt(D))
 	
 	return(L_new)
 }
@@ -71,35 +71,40 @@ chol_inv <- function(coeffs) {
 	return(o)
 }
 
-#' Fit the Choleksy factor of the inverse covariance / concentration matrix 
+#' Fit the ldl factor of the inverse covariance / concentration matrix 
 #' with linear regression
 #'
 #' @param amat Adjacency matrix marking the sparsity of the factor
 #' @param data Data for fitting
 #'
-#' @return Cholesky factor of the inverse covariance matrix
+#' @return A list with the ldl factors
 #' @export
-fit_chol_conc <- function(amat, data) {
+fit_ldl_conc <- function(amat, data) {
 
+	D <- numeric(nrow(amat))
 	B <- amat
 	for (i in seq(nrow(B), from = 2)) {
 		parents <- which(B[i, ] != 0)
 		if (length(parents) > 0) {
-			model <- stats::lm(data[, i] ~ data[, parents])
-			B[i, parents] <- - model$coefficients[-1]
+			model <- summary(stats::lm(data[, i] ~ data[, parents]))
+			B[i, parents] <- - model$coefficients[- 1, 1]
+			D[i] <- model$sigma^2
+		} else {
+			D[i] <- stats::var(data[, i])
 		}
 	}
+	D[1] <- stats::var(data[, 1])
 	diag(B) <- 1
 	
-	return(B)
+	return(list(L = B, D = D))
 }
 
-#' Fit the Cholesky factor of the covariance matrix with linear regression
+#' Fit the ldl factor of the covariance matrix with linear regression
 #' 
 #' @param amat Adjacency matrix marking the sparsity of the factor
 #' @param data Data for fitting
 #' 
-#' @return Cholesky factor of the covariance matrix
+#' @return A list with the ldl factors
 #' @export
 fit_ldl_cov <- function(amat, data) {
 
@@ -117,6 +122,6 @@ fit_ldl_cov <- function(amat, data) {
 	D[1] <- stats::var(data[, 1])
 	diag(B) <- 1
 	
-	return(list(L = B, D = diag(D)))
+	return(list(L = B, D = D))
 }
 

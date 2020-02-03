@@ -3,7 +3,7 @@
 export(chol_inv)
 export(cholfromldl)
 export(cholpath)
-export(fit_chol_conc)
+export(fit_ldl_conc)
 export(fit_ldl_cov)
 export(ldlfromchol)
 export(prxgradchol)

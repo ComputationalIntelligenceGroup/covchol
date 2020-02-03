@@ -10,7 +10,7 @@ ldlfromchol(L)
 \item{L}{Lower Cholesky factor}
 }
 \value{
-a list with the L and D factors
+a list with the L and D factors (D being a vector)
 }
 \description{
 Returns LDL factorization from lower Cholesky factor

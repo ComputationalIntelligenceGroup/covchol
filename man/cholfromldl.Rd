@@ -9,7 +9,7 @@ cholfromldl(L, D)
 \arguments{
 \item{L}{L factor in LDL^t decomposition}
 
-\item{D}{D factor in LDL^t decomposition}
+\item{D}{D factor (diagonal vector) in LDL^t decomposition}
 }
 \value{
 The lower Cholesky factor
