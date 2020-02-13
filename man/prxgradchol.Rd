@@ -15,7 +15,13 @@ prxgradchol(
   job = 1
 )
 
-cholpath(Sigma, lambdas = NULL, L0 = diag(p), eps = 1e-08, maxIter = 1000)
+cholpath(
+  Sigma,
+  lambdas = NULL,
+  L = diag(nrow(Sigma)),
+  eps = 1e-08,
+  maxIter = 1000
+)
 }
 \arguments{
 \item{Sigma}{the empirical covariance matrix}

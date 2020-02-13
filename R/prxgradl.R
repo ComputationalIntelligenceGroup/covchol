@@ -44,16 +44,16 @@ prxgradchol <- function(Sigma, L, eps =  1e-2,
 #' 
 #' @param lambdas increasing sequence of lambdas
 #' @export
-cholpath <- function(Sigma, lambdas = NULL, L0 =  diag(p),
+cholpath <- function(Sigma, lambdas = NULL, L =  diag(nrow(Sigma)),
                     eps = 1e-8, maxIter = 1000){
   if (is.null(lambdas)) {
     lambdas = seq(0, max(diag(Sigma)), length = 10)
   }
   results <- list()
   for (i in 1:length(lambdas)){
-    results[[i]] <- prxgradchol(Sigma, L0, eps, 
+    results[[i]] <- prxgradchol(Sigma, L, eps, 
                               maxIter = maxIter, lambda = lambdas[i])
-    #L0 <- results[[i]]$L
+    #L <- results[[i]]$L
   }
   return(results)
 }
