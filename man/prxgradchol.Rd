@@ -5,9 +5,17 @@
 \alias{cholpath}
 \title{Penalized likelihood estimation of Cholesky factor}
 \usage{
-prxgradchol(Sigma, L, eps = 0.01, alpha = 0.5, maxIter = 100, lambda = 0)
+prxgradchol(
+  Sigma,
+  L,
+  eps = 0.01,
+  alpha = 0.5,
+  maxIter = 100,
+  lambda = 0,
+  job = 1
+)
 
-cholpath(Sigma, lambdas = NULL, eps = 1e-08, maxIter = 1000)
+cholpath(Sigma, lambdas = NULL, L0 = diag(p), eps = 1e-08, maxIter = 1000)
 }
 \arguments{
 \item{Sigma}{the empirical covariance matrix}
@@ -22,6 +30,8 @@ cholpath(Sigma, lambdas = NULL, eps = 1e-08, maxIter = 1000)
 
 \item{lambda}{penalization coefficient}
 
+\item{job}{if 0 no additional zeros will be imposed}
+
 \item{lambdas}{increasing sequence of lambdas}
 }
 \value{
@@ -35,9 +45,8 @@ a list with the output of the optimization:
 * \code{iter} number of iterations
 }
 \description{
-Optimize the  matrix of a continuous Lyapunov 
-Gaussian graphical model (CLGGM) using proximal gradient. 
-\deqn{\hat{L} = \arg \min_{L} 2\log(det(L)) + tr(L^{-t}L^{-1} \Sigma)}
+Solve the following optimization problem
+\deqn{\hat{L} = \arg \min_{L} 2\log(det(L)) + tr(L^{-t}L^{-1} \Sigma)} + ||L||_1,off
 }
 \details{
 \code{cholpath} returns the path of regularized estimator on a sequence of 

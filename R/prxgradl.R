@@ -1,8 +1,7 @@
 #' Penalized likelihood estimation of Cholesky factor
 #' 
-#' Optimize the  matrix of a continuous Lyapunov 
-#' Gaussian graphical model (CLGGM) using proximal gradient. 
-#' \deqn{\hat{L} = \arg \min_{L} 2\log(det(L)) + tr(L^{-t}L^{-1} \Sigma)}
+#' Solve the following optimization problem
+#' \deqn{\hat{L} = \arg \min_{L} 2\log(det(L)) + tr(L^{-t}L^{-1} \Sigma)} + ||L||_1,off
 #' 
 #' \code{cholpath} returns the path of regularized estimator on a sequence of 
 #' \code{lambda} parameters
@@ -13,6 +12,7 @@
 #' @param alpha line search rate
 #' @param maxIter the maximum number of iterations
 #' @param lambda penalization coefficient 
+#' @param job if 0 no additional zeros will be imposed
 #' 
 #' @return a list with the output of the optimization:
 #' 
@@ -27,7 +27,7 @@
 prxgradchol <- function(Sigma, L, eps =  1e-2,
                         alpha = 0.5, 
                         maxIter = 100, 
-                        lambda = 0){
+                        lambda = 0, job = 1){
   out <- .Fortran("PRXGRD",as.integer(ncol(Sigma)), as.double(Sigma), 
                   as.double(L), as.double(lambda), as.double(eps),
                   as.double(alpha), as.integer(maxIter),
@@ -44,9 +44,8 @@ prxgradchol <- function(Sigma, L, eps =  1e-2,
 #' 
 #' @param lambdas increasing sequence of lambdas
 #' @export
-cholpath <- function(Sigma, lambdas = NULL, 
+cholpath <- function(Sigma, lambdas = NULL, L0 =  diag(p),
                     eps = 1e-8, maxIter = 1000){
-  L0 <- t(chol(Sigma))
   if (is.null(lambdas)) {
     lambdas = seq(0, max(diag(Sigma)), length = 10)
   }
