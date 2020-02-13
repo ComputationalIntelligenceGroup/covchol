@@ -5,7 +5,7 @@ c
 c     internal variables
       INTEGER I,J,ITR
       DOUBLE PRECISION F,FNEW,TMP(N,N),GRD(N,N), D(N),
-     *                 ONE, ZERO, STEP, DIFF 
+     *                 ONE, ZERO, STEP
       ITR = 0
       ONE = 1.0
       ZERO = 0.0
@@ -33,12 +33,14 @@ c     compute tr(TMP) + LAMBDA * ||L||_1,off
 c     main loop here, increase iteration counter
  500  CONTINUE      
       ITR = ITR + 1
-c     obtain gradient / 2
+c     compute GRD = I - TMP
       DO 35 J=1,N
          DO 32 I=1,N
-            GRD(I,J) = TMP(I,J)
+            GRD(I,J) = -TMP(I,J)
   32     CONTINUE   
+            GRD(J,J) = GRD(J,J) + 1
   35  CONTINUE
+c     compute GRD = GRD * L**(-1)
       CALL DTRSM("R","L","N","N",N,N,ONE,L,N,GRD,N) 
 c     copy old L before starting line search 
       DO 90 J = 1,N - 1
@@ -54,17 +56,25 @@ c     line search loop here
 c     gradient step
       DO 110 J = 1,N-1 
          DO 100 I = J + 1,N
-            L(I,J) = L(J,I) + 2 * STEP * GRD(I,J) 
+            L(I,J) = L(J,I) - 2 * STEP * GRD(I,J) 
   100    CONTINUE
-            L(J,J) = D(J) + 2 * STEP * GRD(J,J)
+            L(J,J) = D(J) - 2 * STEP * GRD(J,J)
+            IF (L(J,J) .LT. 0) THEN
+                   STEP = STEP * ALPHA
+                   GOTO 600 
+            ENDIF
   110 CONTINUE
-            L(N,N) = D(N) + 2 * STEP * GRD(N,N)
+            L(N,N) = D(N) - 2 * STEP * GRD(N,N)
+            IF (L(N,N) .LT. 0) THEN
+                   STEP = STEP * ALPHA
+                   GOTO 600 
+            ENDIF
 c     soft thresholding
       DO 130 J =1,N - 1
          DO 120 I=J + 1,N
             L(I,J) = SIGN(ONE,L(I,J))*(ABS(L(I,J))-STEP*LAMBDA) 
             IF (ABS(L(I,J)) .LE. STEP*LAMBDA) THEN
-                    L(I,J) = 0
+                     L(I,J) = 0
             ENDIF
             TMP(I,J) = SIGMA(I,J)
             TMP(J,I) = SIGMA(I,J)
