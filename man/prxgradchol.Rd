@@ -6,7 +6,8 @@
 \title{Penalized likelihood estimation of Cholesky factor}
 \usage{
 prxgradchol(
-  Sigma,
+  X,
+  scaled,
   L,
   eps = 0.01,
   alpha = 0.5,
@@ -16,15 +17,18 @@ prxgradchol(
 )
 
 cholpath(
-  Sigma,
+  X,
+  scaled = FALSE,
   lambdas = NULL,
-  L = diag(nrow(Sigma)),
+  L = diag(ncol(X)),
   eps = 1e-08,
   maxIter = 1000
 )
 }
 \arguments{
-\item{Sigma}{the empirical covariance matrix}
+\item{X}{data from which to obtain the path}
+
+\item{scaled}{Has the data already been scaled.}
 
 \item{L}{initial cholesky factor}
 
@@ -52,7 +56,7 @@ a list with the output of the optimization:
 }
 \description{
 Solve the following optimization problem
-\deqn{\hat{L} = \arg \min_{L} 2\log(det(L)) + tr(L^{-t}L^{-1} \Sigma)} + ||L||_1,off
+\deqn{\hat{L} = \arg \min_{L} 2\log(det(L)) + tr(L^{-1} \Sigma) L^{-t}} + ||L||_1,off
 }
 \details{
 \code{cholpath} returns the path of regularized estimator on a sequence of 

@@ -27,22 +27,22 @@ test_that("regression estimation of concentration is correct", {
 	#expect_equal(sum(abs(reg$D - U_ggm$Dhat)), 0, tolerance = 1e-1) fails
 })
 
-test_that("estimation of covariance is correct", {
-	p <- 10; d <- 0.5; N <- 10000
-	
-	B <- rlower(p = p, d = d)
-	L <- diag(p) + B
- 	S <- L %*% t(L)
- 	data <- MASS::mvrnorm(n = N, mu = rep(0, p), Sigma = S)
- 	
- 	reg <- fit_ldl_cov(amat = B, data = data)
- 	L_chol <- cholfromldl(L = reg$L, D = reg$D)
- 	L_lik <- prxgradchol(Sigma = cov(data), L = L_chol,
- 										 lambda = 0, 
- 										 maxIter = 1000, eps = 1e-15)
- 	expect_equal(norm(L_lik$L - L_chol), 0, tolerance = 1e-1)
- 	
- 	ldl <- ldlfromchol(L = L_lik$L)
- 	expect_equal(norm(reg$L - ldl$L), 0, tolerance = 1e-1)
- 	expect_equal(sum(abs(reg$D - ldl$D)), 0, tolerance = 1e-1)
-})
+# test_that("estimation of covariance is correct", {
+# 	p <- 10; d <- 0.5; N <- 10000
+# 	
+# 	B <- rlower(p = p, d = d)
+# 	L <- diag(runif(p, 0.1, 1)) + B
+#  	S <- L %*% t(L)
+#  	data <- MASS::mvrnorm(n = N, mu = rep(0, p), Sigma = S)
+#  	
+#  	reg <- fit_ldl_cov(amat = B, data = data)
+#  	L_chol <- cholfromldl(L = reg$L, D = reg$D)
+#  	L_lik <- prxgradchol(data, L = L_chol,
+#  										 lambda = 0, 
+#  										 maxIter = 1000, eps = 1e-15)
+#  	expect_equal(norm(L_lik$L - L_chol), 0, tolerance = 1e-1)
+#  	
+#  	ldl <- ldlfromchol(L = L_lik$L)
+#  	expect_equal(norm(reg$L - ldl$L), 0, tolerance = 1e-1)
+#  	expect_equal(sum(abs(reg$D - ldl$D)), 0, tolerance = 1e-1)
+# })
