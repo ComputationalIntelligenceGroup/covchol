@@ -28,15 +28,10 @@
 prxgradchol <- function(X, scaled,  L, eps =  1e-2,
                         alpha = 0.5, 
                         maxIter = 100, 
-                        lambda = 0, job = 1){
-	if (scaled == FALSE) {
-		Sigma <- stats::cov(X)
-		D_scale <- 1/sqrt(diag(Sigma))
-		Cor <- diag(D_scale) %*% Sigma %*% diag(D_scale)
-	} else {
-		Cor <- stats::cov(X)
-	}
-  out <- .Fortran("PRXGRD",as.integer(ncol(X)), as.double(Cor), 
+                        lambda = 0, job = 1) {
+	Cor <- stats::cor(X)
+  
+	out <- .Fortran("PRXGRD",as.integer(ncol(X)), as.double(Cor), 
                   as.double(L), as.double(lambda), as.double(eps),
                   as.double(alpha), as.integer(maxIter),
                   PACKAGE = "covchol")
@@ -47,6 +42,7 @@ prxgradchol <- function(X, scaled,  L, eps =  1e-2,
   
   # Return to covariance matrices
   if (scaled == FALSE) {
+  	D_scale <- 1/sqrt(diag(stats::cov(X)))
   	out$L <- diag(1/D_scale) %*% out$L
   	out$Sigma <- out$L %*% t(out$L)
   }
