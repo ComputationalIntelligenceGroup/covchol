@@ -8,7 +8,7 @@
 prxgradchol(
   X,
   scaled,
-  L,
+  L = diag(ncol(X)),
   eps = 0.01,
   alpha = 0.5,
   maxIter = 100,

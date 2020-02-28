@@ -25,7 +25,7 @@
 #' * \code{iter} number of iterations
 #' @useDynLib covchol
 #' @export
-prxgradchol <- function(X, scaled,  L, eps =  1e-2,
+prxgradchol <- function(X, scaled,  L = diag(ncol(X)), eps =  1e-2,
                         alpha = 0.5, 
                         maxIter = 100, 
                         lambda = 0, job = 1) {
