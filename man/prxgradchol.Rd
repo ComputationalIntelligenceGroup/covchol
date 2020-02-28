@@ -7,7 +7,6 @@
 \usage{
 prxgradchol(
   X,
-  scaled,
   L = diag(ncol(X)),
   eps = 0.01,
   alpha = 0.5,
@@ -16,19 +15,10 @@ prxgradchol(
   job = 1
 )
 
-cholpath(
-  X,
-  scaled = FALSE,
-  lambdas = NULL,
-  L = diag(ncol(X)),
-  eps = 1e-08,
-  maxIter = 1000
-)
+cholpath(X, lambdas = NULL, L = diag(ncol(X)), eps = 1e-08, maxIter = 1000)
 }
 \arguments{
 \item{X}{data from which to obtain the path}
-
-\item{scaled}{Has the data already been scaled.}
 
 \item{L}{initial cholesky factor}
 

@@ -7,7 +7,6 @@
 #' \code{lambda} parameters
 #' 
 #' @param X data from which to obtain the path
-#' @param scaled Has the data already been scaled.
 #' @param L initial cholesky factor
 #' @param eps convergence threshold for the proximal gradient
 #' @param alpha line search rate
@@ -25,7 +24,7 @@
 #' * \code{iter} number of iterations
 #' @useDynLib covchol
 #' @export
-prxgradchol <- function(X, scaled,  L = diag(ncol(X)), eps =  1e-2,
+prxgradchol <- function(X, L = diag(ncol(X)), eps =  1e-2,
                         alpha = 0.5, 
                         maxIter = 100, 
                         lambda = 0, job = 1) {
@@ -41,11 +40,10 @@ prxgradchol <- function(X, scaled,  L = diag(ncol(X)), eps =  1e-2,
   out$Sigma <- matrix(nrow = out$N, out$Sigma)
   
   # Return to covariance matrices
-  if (scaled == FALSE) {
-  	D_scale <- 1/sqrt(diag(stats::cov(X)))
-  	out$L <- diag(1/D_scale) %*% out$L
-  	out$Sigma <- out$L %*% t(out$L)
-  }
+ 	D_scale <- sqrt(diag(stats::cov(X)))
+  out$L <- diag(D_scale) %*% out$L
+  
+  out$Sigma <- out$L %*% t(out$L)
   
   return(out)
 }
@@ -55,15 +53,25 @@ prxgradchol <- function(X, scaled,  L = diag(ncol(X)), eps =  1e-2,
 #' 
 #' @param lambdas increasing sequence of lambdas
 #' @export
-cholpath <- function(X, scaled = FALSE, lambdas = NULL, L =  diag(ncol(X)),
+cholpath <- function(X, lambdas = NULL, L =  diag(ncol(X)),
                     eps = 1e-8, maxIter = 1000){
   if (is.null(lambdas)) {
-    lambdas = seq(0, 1, length = 10)
+  	p <- ncol(X)
+  	N <- nrow(X)
+  	
+  	if (p < N) {
+  		lambda.min.exp <- -4
+  	} else {
+  		lambda.min.exp <- -2
+  	}
+  	
+    lambdas <- 10^seq(0, lambda.min.exp, length = 100)
   }
   results <- list()
   for (i in 1:length(lambdas)){
-    results[[i]] <- prxgradchol(X, scaled, L, eps, 
+    results[[i]] <- prxgradchol(X, L, eps, 
                               maxIter = maxIter, lambda = lambdas[i])
+    L <- results[[i]]$L
   }
   return(results)
 }
