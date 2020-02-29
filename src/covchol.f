@@ -5,7 +5,7 @@ c
 c     internal variables
       INTEGER I,J,ITR
       DOUBLE PRECISION F,FNEW,TMP(N,N),GRD(N,N), D(N),
-     *                 ONE, ZERO, STEP
+     *                 ONE, ZERO, STEP, DIFF, G, GNW
       ITR = 0
       ONE = 1.0
       ZERO = 0.0
@@ -23,13 +23,14 @@ c     compute TMP = L^(-1) * SIGMA * L^(-t)
       CALL DTRSM("R","L","T","N",N,N,ONE,L,N,TMP,N) 
 c     compute tr(TMP) + LAMBDA * ||L||_1,off
       F = 0
+      G = 0
       DO 30 J=1,N-1
-         F = F + TMP(J,J) + 2 * LOG(L(J,J)) 
+         F = F + TMP(J,J) + 2 * LOG(ABS(L(J,J))) 
          DO 25 I=J+1, N
-            F = F + LAMBDA * ABS(L(I,J))
+            G = G + LAMBDA * ABS(L(I,J))
   25     CONTINUE
   30  CONTINUE
-      F = F + TMP(N,N) + 2* LOG(L(N,N))
+      F = F + TMP(N,N) + 2* LOG(ABS(L(N,N)))
 c     main loop here, increase iteration counter
  500  CONTINUE      
       ITR = ITR + 1
@@ -38,7 +39,7 @@ c     compute GRD = I - TMP
          DO 32 I=1,N
             GRD(I,J) = -TMP(I,J)
   32     CONTINUE   
-            GRD(J,J) = GRD(J,J) + 1
+            GRD(J,J) = GRD(J,J) + 1 
   35  CONTINUE
 c     compute GRD = GRD * L**(-1)
       CALL DTRSM("R","L","N","N",N,N,ONE,L,N,GRD,N) 
@@ -73,9 +74,9 @@ c     soft thresholding
       DO 130 J =1,N - 1
          DO 120 I=J + 1,N
             L(I,J) = SIGN(ONE,L(I,J))*(ABS(L(I,J))-STEP*LAMBDA) 
-            IF (ABS(L(I,J)) .LE. STEP*LAMBDA) THEN
-                     L(I,J) = 0
-            ENDIF
+c            IF (ABS(L(I,J)) .LE. STEP*LAMBDA) THEN
+c                     L(I,J) = 0
+c            ENDIF
             TMP(I,J) = SIGMA(I,J)
             TMP(J,I) = SIGMA(I,J)
  120     CONTINUE
@@ -85,24 +86,25 @@ c     soft thresholding
       CALL DTRSM("L","L","N","N",N,N,ONE,L,N,TMP,N) 
       CALL DTRSM("R","L","T","N",N,N,ONE,L,N,TMP,N) 
 c     compute FNW, objective function in new L
-c      DIFF = 0
+      DIFF = 0
       FNW = 0 
+      GNW = 0
       DO 140 J=1,N - 1
-         FNW = FNW + TMP(J,J) + 2 * LOG(L(J,J)) 
+         FNW = FNW + TMP(J,J) + 2 * LOG(ABS(L(J,J))) 
          DO 135 I=J+1, N
-            FNW = FNW + LAMBDA * ABS(L(I,J))
-c            DIFF = DIFF + ((L(I,J) - L(J,I)) ** 2) / (2 * STEP) +  
-c     *             (L(I,J) - L(J,I)) * GRD(I,J) 
+            GNW = GNW + LAMBDA * ABS(L(I,J))
+            DIFF = DIFF + ((L(I,J) - L(J,I)) ** 2) / (2 * STEP) +  
+     *             2*(L(I,J) - L(J,I)) * GRD(I,J) 
  135     CONTINUE
-c            DIFF = DIFF + ((L(J,J) - D(J)) ** 2) / (2 * STEP) + 
-c     *             (L(J,J) - D(J)) * GRD(J,J) 
+            DIFF = DIFF + ((L(J,J) - D(J)) ** 2) / (2 * STEP) + 
+     *             2*(L(J,J) - D(J)) * GRD(J,J) 
  140  CONTINUE
-c            DIFF = DIFF + ((L(N,N) - D(N)) ** 2) / (2 * STEP) + 
-c     *             (L(N,N) - D(N)) * GRD(N,N) 
-      FNW = FNW + TMP(N,N) + 2 * LOG(L(N,N))
+            DIFF = DIFF + ((L(N,N) - D(N)) ** 2) / (2 * STEP) + 
+     *             2*(L(N,N) - D(N)) * GRD(N,N) 
+      FNW = FNW + TMP(N,N) + 2 * LOG(ABS(L(N,N)))
 c     line search with descent condition
-      IF (FNW .GT. F) THEN
-         IF (STEP .LT. EPS) THEN
+      IF (FNW + GNW .GE. F + G .OR. FNW  .GE. F  + DIFF) THEN
+         IF (STEP .LT. 1E-30) THEN
             ALPHA = F
             EPS = (F - FNW) / ABS(F)   
             MAXITR = ITR
@@ -120,10 +122,10 @@ c     line search with descent condition
          GOTO 600
       ENDIF
 c     check stopping criteria
-      IF (((F - FNW) / ABS(F) .LE. EPS) .OR.  (ITR .GE. MAXITR)) THEN
+      IF (( ((F+G-FNW-GNW)/ABS(F+G)).LE.EPS).OR.(ITR .GE. MAXITR)) THEN
 c     terminate, clean L and save additional outputs
          ALPHA = FNW 
-         EPS = (F - FNW) / ABS(F)   
+         EPS = (F + G - FNW - GNW) / ABS(F+FNW)   
          MAXITR = ITR
          DO 180 J=1,N-1
             DO 170 I =J + 1,N
@@ -134,6 +136,7 @@ c     terminate, clean L and save additional outputs
       ENDIF  
 c     update value of objective function and repeat
       F = FNW
+      G = GNW
       GOTO 500
  900  CONTINUE
       RETURN
