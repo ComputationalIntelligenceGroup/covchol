@@ -74,9 +74,9 @@ c     soft thresholding
       DO 130 J =1,N - 1
          DO 120 I=J + 1,N
             L(I,J) = SIGN(ONE,L(I,J))*(ABS(L(I,J))-STEP*LAMBDA) 
-c            IF (ABS(L(I,J)) .LE. STEP*LAMBDA) THEN
-c                     L(I,J) = 0
-c            ENDIF
+            IF (ABS(L(I,J)) .LE. STEP*LAMBDA) THEN
+                     L(I,J) = 0
+            ENDIF
             TMP(I,J) = SIGMA(I,J)
             TMP(J,I) = SIGMA(I,J)
  120     CONTINUE
