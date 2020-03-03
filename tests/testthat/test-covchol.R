@@ -34,7 +34,15 @@ test_that("estimation of covariance is correct", {
  	S <- L %*% t(L)
  	X <- MASS::mvrnorm(n = N, mu = rep(0, p), Sigma = S)
 
-	res <- prxgradchol(X, L = L, lambda = 0)
-	
- 	expect_equal(norm(res$Sigma - S, type = "F"), 0, tolerance = 1e-2)
+ 	out <- .Fortran("PRXGRD",as.integer(ncol(X)), as.double(S), 
+ 									as.double(L), as.double(0), as.double(1e-15),
+ 									as.double(0.5), as.integer(1000),
+ 									PACKAGE = "covchol")
+ 	names(out) <- c("N","Sigma", "L", "lambda", "diff", 
+ 									"objective", "iter")
+ 	out$L <- matrix(nrow = out$N, out$L)
+ 	out$Sigma <- matrix(nrow = out$N, out$Sigma)
+ 	
+ 	expect_equal(norm(out$Sigma - S, type = "F"), 0)
+ 	expect_equal(out$iter, 1)
 })
