@@ -28,15 +28,13 @@ test_that("regression estimation of concentration is correct", {
 })
 
 test_that("estimation of covariance is correct", {
-	p <- 10; d <- 1; N <- 10000;
+	p <- 5; d <- 1; N <- 10000;
 	
-	L <- rlower(p = p, d = d)
-	diag(L) <- runif(p, 0.1, 1)
+	L <- gmat::mh_u(N = 1, p = p, dag = gmat::rgraph(p = p, d = d, dag = TRUE))[, , 1][p:1, p:1]
  	S <- L %*% t(L)
  	X <- MASS::mvrnorm(n = N, mu = rep(0, p), Sigma = S)
 
- 	L_scale <- diag(1/sqrt(diag(cov(X)))) %*% L
-	res <- prxgradchol(X, L = L_scale, lambda = 0)
+	res <- prxgradchol(X, L = L, lambda = 0)
 	
  	expect_equal(norm(res$Sigma - S, type = "F"), 0, tolerance = 1e-2)
 })

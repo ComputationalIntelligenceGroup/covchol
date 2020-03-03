@@ -19,6 +19,7 @@ RoxygenNote: 7.0.2
 Imports:
 	stats,
 	ggm,
-	MASS
+	MASS,
+	gmat
 Suggests: 
     testthat (>= 2.1.0)
