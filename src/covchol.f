@@ -104,7 +104,7 @@ c   new - old
      *             (L(N,N) - D(N)) * GRD(N,N) 
       FNW = FNW + TMP(N,N) + 2 * LOG(ABS(L(N,N)))
 c     line search with descent condition
-      IF ( (FNW + GNW .GT. F + G) .OR. FNW .GT. F + DIFF) THEN
+      IF (FNW .GT. (F + DIFF)) THEN
          STEP = STEP * ALPHA
          GOTO 600
       ENDIF
