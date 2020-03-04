@@ -41,8 +41,8 @@ c     compute GRD = I - TMP
   32     CONTINUE   
             GRD(J,J) = GRD(J,J) + 1 
   35  CONTINUE
-c     compute GRD = GRD * L**(-1)
-      CALL DTRSM("R","L","N","N",N,N,ONE,L,N,GRD,N) 
+c     compute GRD = L**(-t) * GRD 
+      CALL DTRSM("L","L","T","N",N,N,2*ONE,L,N,GRD,N) 
 c     copy old L before starting line search 
       DO 90 J = 1,N - 1
          DO 80 I = J + 1,N
@@ -57,15 +57,15 @@ c     line search loop here
 c     gradient step
       DO 110 J = 1,N-1 
          DO 100 I = J + 1,N
-            L(I,J) = L(J,I) - 2 * STEP * GRD(I,J) 
+            L(I,J) = L(J,I) - STEP * GRD(I,J) 
   100    CONTINUE
-            L(J,J) = D(J) - 2 * STEP * GRD(J,J)
+            L(J,J) = D(J) - STEP * GRD(J,J)
             IF (L(J,J) .LT. 0) THEN
                    STEP = STEP * ALPHA
                    GOTO 600 
             ENDIF
   110 CONTINUE
-            L(N,N) = D(N) - 2 * STEP * GRD(N,N)
+            L(N,N) = D(N) - STEP * GRD(N,N)
             IF (L(N,N) .LT. 0) THEN
                    STEP = STEP * ALPHA
                    GOTO 600 
@@ -93,31 +93,18 @@ c     compute FNW, objective function in new L
          FNW = FNW + TMP(J,J) + 2 * LOG(ABS(L(J,J))) 
          DO 135 I=J+1, N
             GNW = GNW + LAMBDA * ABS(L(I,J))
+c   new - old
             DIFF = DIFF + ((L(I,J) - L(J,I)) ** 2) / (2 * STEP) +  
-     *             2*(L(I,J) - L(J,I)) * GRD(I,J) 
+     *             (L(I,J) - L(J,I)) * GRD(I,J) 
  135     CONTINUE
             DIFF = DIFF + ((L(J,J) - D(J)) ** 2) / (2 * STEP) + 
-     *             2*(L(J,J) - D(J)) * GRD(J,J) 
+     *             (L(J,J) - D(J)) * GRD(J,J) 
  140  CONTINUE
             DIFF = DIFF + ((L(N,N) - D(N)) ** 2) / (2 * STEP) + 
-     *             2*(L(N,N) - D(N)) * GRD(N,N) 
+     *             (L(N,N) - D(N)) * GRD(N,N) 
       FNW = FNW + TMP(N,N) + 2 * LOG(ABS(L(N,N)))
 c     line search with descent condition
-      IF (FNW + GNW .GE. F + G .OR. FNW  .GE. F  + DIFF) THEN
-         IF (STEP .LT. 1E-30) THEN
-            ALPHA = F
-            EPS = (F - FNW) / ABS(F)   
-            MAXITR = ITR
-            DO 160 J=1,N-1
-               DO 150 I =J + 1,N
-                  L(I,J) = L(J,I)
-                  L(J,I) = 0
- 150           CONTINUE   
-               L(J,J) = D(J)
- 160        CONTINUE 
-            L(N,N) = D(N)
-            GOTO 900
-         ENDIF
+      IF (FNW .GT. (F + DIFF)) THEN
          STEP = STEP * ALPHA
          GOTO 600
       ENDIF
