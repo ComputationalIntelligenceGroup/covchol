@@ -37,13 +37,12 @@ prxgradchol <- function(X, L = diag(ncol(X)), eps =  1e-2,
   names(out) <- c("N","Sigma", "L", "lambda", "diff", 
                   "objective", "iter")
   out$L <- matrix(nrow = out$N, out$L)
-  out$Sigma <- matrix(nrow = out$N, out$Sigma)
-  
+
   # Return to covariance matrices
  	D_scale <- sqrt(diag(stats::cov(X)))
   out$L <- diag(D_scale) %*% out$L
-  
-  out$Sigma <- out$L %*% t(out$L)
+  # compute Sigma
+  out$Sigma <- tcrossprod(out$L)
   
   return(out)
 }
