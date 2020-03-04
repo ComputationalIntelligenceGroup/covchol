@@ -1,24 +1,25 @@
 Package: covchol
 Type: Package
-Title: Covariance Cholesky factor exploration
+Title: Covariance Cholesky factor estimation
 Version: 0.0.1.9000
 Date: 2020-01-09
 Encoding: UTF-8
 Authors@R: c(
     person(given = "Irene", family = "Córdoba", email = "irene.cordoba@upm.es", role = c("aut", "cre"),
 	comment = c(ORCID = "0000-0002-3252-4234")),
+    person(given = "Gherardo", family = "Varando", role = "aut",
+	comment = c(ORCID = "0000-0002-6708-1103")),
     person(given = "Concha", family = "Bielza", role = "ths",
 	comment = c(ORCID = "0000-0001-7109-2668")),
     person(given = "Pedro", family = "Larrañaga", role = "ths",
 	comment = c(ORCID = "0000-0003-0652-9872")))
-Description: Exploration of the Cholesky factor of a covariance matrix.
+Description: Estimation of the Cholesky factor of a covariance matrix with proximal gradient descent.
 License: GPL (>=2)
 URL: https://github.com/irenecrsn/covchol
 BugReports: https://github.com/irenecrsn/covchol/issues
 RoxygenNote: 7.0.2
 Imports:
 	stats,
-	ggm,
 	MASS,
 	gmat
 Suggests: 
