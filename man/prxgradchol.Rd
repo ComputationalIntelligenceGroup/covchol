@@ -12,10 +12,17 @@ prxgradchol(
   alpha = 0.5,
   maxIter = 100,
   lambda = 0,
-  job = 1
+  normalize = TRUE
 )
 
-cholpath(X, lambdas = NULL, L = diag(ncol(X)), eps = 1e-08, maxIter = 1000)
+cholpath(
+  X,
+  lambdas = NULL,
+  L = diag(ncol(X)),
+  eps = 1e-08,
+  maxIter = 1000,
+  normalize = TRUE
+)
 }
 \arguments{
 \item{X}{data from which to obtain the path}
@@ -30,7 +37,7 @@ cholpath(X, lambdas = NULL, L = diag(ncol(X)), eps = 1e-08, maxIter = 1000)
 
 \item{lambda}{penalization coefficient}
 
-\item{job}{if 0 no additional zeros will be imposed}
+\item{normalize}{logical}
 
 \item{lambdas}{increasing sequence of lambdas}
 }

@@ -12,6 +12,7 @@
 #' @param alpha line search rate
 #' @param maxIter the maximum number of iterations
 #' @param lambda penalization coefficient 
+#' @param normalize logical
 #' 
 #' @return a list with the output of the optimization:
 #' 
@@ -75,10 +76,10 @@ cholpath <- function(X, lambdas = NULL, L =  diag(ncol(X)),
     lambdas <- 10^seq(0, lambda.min.exp, length = 100)
   }
   if (normalize){
-    S <- cor(X)
+    S <- stats::cor(X)
     D_scale <- sqrt(diag(stats::cov(X)))
   }else{
-    S <- cov(X)
+    S <- stats::cov(X)
   }
   results <- list()
   for (i in 1:length(lambdas)){
