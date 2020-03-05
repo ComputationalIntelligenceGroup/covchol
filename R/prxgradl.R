@@ -24,7 +24,7 @@
 #' * \code{iter} number of iterations
 #' @useDynLib covchol
 #' @export
-prxgradchol <- function(X, L = diag(ncol(X)), eps =  1e-2,
+prxgradchol <- function(X, L = diag(ncol(X)), eps =  1e-6,
                         alpha = 0.5, 
                         maxIter = 100, 
                         lambda = 0, normalize = TRUE) {
@@ -61,7 +61,7 @@ prxgradchol <- function(X, L = diag(ncol(X)), eps =  1e-2,
 #' @param lambdas increasing sequence of lambdas
 #' @export
 cholpath <- function(X, lambdas = NULL, L =  diag(ncol(X)),
-                    eps = 1e-8, maxIter = 1000, normalize = TRUE){
+                    eps = 1e-6, maxIter = 100, normalize = TRUE){
   alpha <- 0.5
   if (is.null(lambdas)) {
   	p <- ncol(X)
