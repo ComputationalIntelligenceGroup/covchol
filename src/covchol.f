@@ -5,9 +5,10 @@ c
 c     internal variables
       INTEGER I,J,ITR
       DOUBLE PRECISION F,FNEW,TMP(N,N),GRD(N,N), D(N),
-     *                 ONE, ZERO, STEP, DIFF, G, GNW
+     *                 ONE, TWO, ZERO, STEP, DIFF, G, GNW
       ITR = 0
       ONE = 1.0
+      TWO = 2.0
       ZERO = 0.0
       DO 20 J = 1,N - 1
          DO 10 I = J + 1,N
@@ -41,8 +42,8 @@ c     compute GRD = I - TMP
   32     CONTINUE   
             GRD(J,J) = GRD(J,J) + 1 
   35  CONTINUE
-c     compute GRD = L**(-t) * GRD 
-      CALL DTRSM("L","L","T","N",N,N,2*ONE,L,N,GRD,N) 
+c     compute GRD = L**(-t) * 2 * GRD 
+      CALL DTRSM("L","L","T","N",N,N,TWO,L,N,GRD,N) 
 c     copy old L before starting line search 
       DO 90 J = 1,N - 1
          DO 80 I = J + 1,N

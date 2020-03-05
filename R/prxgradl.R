@@ -12,7 +12,7 @@
 #' @param alpha line search rate
 #' @param maxIter the maximum number of iterations
 #' @param lambda penalization coefficient 
-#' @param job if 0 no additional zeros will be imposed
+#' @param normalize logical
 #' 
 #' @return a list with the output of the optimization:
 #' 
@@ -27,8 +27,13 @@
 prxgradchol <- function(X, L = diag(ncol(X)), eps =  1e-2,
                         alpha = 0.5, 
                         maxIter = 100, 
-                        lambda = 0, job = 1) {
-	Cor <- stats::cor(X)
+                        lambda = 0, normalize = TRUE) {
+  if (normalize){
+    Cor <- stats::cor(X)    
+  }else{
+    Cor <- stats::cov(X)
+  }
+
   
 	out <- .Fortran("PRXGRD",as.integer(ncol(X)), as.double(Cor), 
                   as.double(L), as.double(lambda), as.double(eps),
@@ -39,8 +44,11 @@ prxgradchol <- function(X, L = diag(ncol(X)), eps =  1e-2,
   out$L <- matrix(nrow = out$N, out$L)
 
   # Return to covariance matrices
- 	D_scale <- sqrt(diag(stats::cov(X)))
-  out$L <- diag(D_scale) %*% out$L
+  if (normalize){
+    D_scale <- sqrt(diag(stats::cov(X)))
+    out$L <- diag(D_scale) %*% out$L    
+  }
+  
   # compute Sigma
   out$Sigma <- tcrossprod(out$L)
   
@@ -53,7 +61,8 @@ prxgradchol <- function(X, L = diag(ncol(X)), eps =  1e-2,
 #' @param lambdas increasing sequence of lambdas
 #' @export
 cholpath <- function(X, lambdas = NULL, L =  diag(ncol(X)),
-                    eps = 1e-8, maxIter = 1000){
+                    eps = 1e-8, maxIter = 1000, normalize = TRUE){
+  alpha <- 0.5
   if (is.null(lambdas)) {
   	p <- ncol(X)
   	N <- nrow(X)
@@ -66,11 +75,28 @@ cholpath <- function(X, lambdas = NULL, L =  diag(ncol(X)),
   	
     lambdas <- 10^seq(0, lambda.min.exp, length = 100)
   }
+  if (normalize){
+    S <- stats::cor(X)
+    D_scale <- sqrt(diag(stats::cov(X)))
+  }else{
+    S <- stats::cov(X)
+  }
   results <- list()
   for (i in 1:length(lambdas)){
-    results[[i]] <- prxgradchol(X, L, eps, 
-                              maxIter = maxIter, lambda = lambdas[i])
-    L <- results[[i]]$L
+    results[[i]] <- .Fortran("PRXGRD",as.integer(ncol(X)), as.double(S), 
+                             as.double(L), as.double(lambdas[[i]]), as.double(eps),
+                             as.double(alpha), as.integer(maxIter),
+                             PACKAGE = "covchol")
+    names(results[[i]]) <- c("N","Sigma", "L", "lambda", "diff", 
+                    "objective", "iter")
+    results[[i]]$L <- matrix(nrow = results[[i]]$N, 
+                             results[[i]]$L)
+    ### the warm start shold not be normalized back
+    L <- results[[i]]$L ## warm start for next iteration
+    if (normalize){
+      results[[i]]$L <- diag(D_scale) %*% results[[i]]$L 
+    }
+    results[[i]]$Sigma <- tcrossprod(results[[i]]$L)
   }
   return(results)
 }
