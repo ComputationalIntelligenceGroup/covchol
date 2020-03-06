@@ -130,4 +130,123 @@ c     update value of objective function and repeat
       RETURN
 c     last line of PRXGRD
       END
-
+c
+      SUBROUTINE PRXGRDF(N,SIGMA,L,LAMBDA,EPS,ALPHA,MAXITR)
+      INTEGER N,MAXITR
+      DOUBLE PRECISION SIGMA(N,N),L(N,N),LAMBDA,EPS,ALPHA      
+c      
+c     internal variables
+      INTEGER I,J,ITR
+      DOUBLE PRECISION F,FNEW,TMP(N,N),GRD(N,N), D(N), MONE,
+     *                 ONE, TWO, ZERO, STEP, DIFF, G, GNW
+      ITR = 0
+      ONE = 1.0
+      TWO = 2.0
+      ZERO = 0.0
+      MONE = -1.0
+      DO 20 J = 1,N - 1
+         DO 10 I = J + 1,N
+            TMP(I,J) = SIGMA(I,J)
+  10     CONTINUE          
+            TMP(J,J) = SIGMA(J,J)
+  20  CONTINUE 
+      TMP(N,N) = SIGMA(N,N)
+c     compute TMP = LL**T - SIGMA
+      CALL DSYRK("L", "N", N, N, ONE, L, N, MONE, TMP, N)
+c     compute initial objective function
+      F = 0
+      G = 0
+      DO 30 J=1,N-1
+         DO 25 I=J+1, N
+            F = F + TMP(I,J)**2
+            G = G + LAMBDA * ABS(L(I,J))
+  25     CONTINUE
+         F = F + TMP(J,J)**2
+  30  CONTINUE
+      F = F + TMP(N,N)**2
+c     main loop here, increase iteration counter
+ 500  CONTINUE      
+      ITR = ITR + 1
+c     compute GRD = 2*(LL**T-SIGMA)*L = 2*TMP*L
+      CALL DSYMM("L","L",N,N,TWO,TMP,N,L,N, ZERO,GRD,N) 
+c     copy old L before starting line search 
+      DO 90 J = 1,N - 1
+         DO 80 I = J + 1,N
+             TMP(J,I) = L(I,J)
+  80     CONTINUE          
+             D(J) = L(J,J)
+  90  CONTINUE 
+             D(N) = L(N,N)
+      STEP = 1
+c     line search loop here
+  600 CONTINUE     
+c     gradient step
+      DO 110 J = 1,N-1 
+         DO 100 I = J + 1,N
+            L(I,J) = TMP(J,I) - STEP * GRD(I,J) 
+  100    CONTINUE
+            L(J,J) = D(J) - STEP * GRD(J,J)
+            IF (L(J,J) .LT. 0) THEN
+                   STEP = STEP * ALPHA
+                   GOTO 600 
+            ENDIF
+  110 CONTINUE
+            L(N,N) = D(N) - STEP * GRD(N,N)
+            IF (L(N,N) .LT. 0) THEN
+                   STEP = STEP * ALPHA
+                   GOTO 600 
+            ENDIF
+c     soft thresholding
+      DO 130 J =1,N - 1
+         DO 120 I=J + 1,N
+            L(I,J) = SIGN(ONE,L(I,J))*(ABS(L(I,J))-STEP*LAMBDA) 
+            IF (ABS(L(I,J)) .LE. STEP*LAMBDA) THEN
+                     L(I,J) = 0
+            ENDIF
+            TMP(I,J) = SIGMA(I,J)
+ 120     CONTINUE
+         TMP(J,J) = SIGMA(J,J)
+ 130  CONTINUE
+      TMP(N,N) = SIGMA(N,N)
+c     compute TMP = LL**T - SIGMA
+      CALL DSYRK("L", "N", N, N, ONE, L, N, MONE, TMP, N)
+c     compute FNW, objective function in new L
+      DIFF = 0
+      FNW = 0 
+      GNW = 0
+      DO 140 J=1,N - 1
+         DO 135 I=J+1, N
+            FNW = FNW + TMP(I,J)**2 
+            GNW = GNW + LAMBDA * ABS(L(I,J))
+c   new - old
+            DIFF = DIFF + ((L(I,J) - TMP(J,I)) ** 2) / (2 * STEP) +  
+     *             (L(I,J) - TMP(J,I)) * GRD(I,J) 
+ 135     CONTINUE
+            FNW = FNW + TMP(J,J)**2 
+            DIFF = DIFF + ((L(J,J) - D(J)) ** 2) / (2 * STEP) + 
+     *             (L(J,J) - D(J)) * GRD(J,J) 
+ 140  CONTINUE
+            FNW = FNW + TMP(N,N)**2 
+            DIFF = DIFF + ((L(N,N) - D(N)) ** 2) / (2 * STEP) + 
+     *             (L(N,N) - D(N)) * GRD(N,N) 
+c     line search with descent condition
+      IF (FNW .GT. (F + DIFF)) THEN
+         STEP = STEP * ALPHA
+         GOTO 600
+      ENDIF
+c     check stopping criteria
+      IF (( ((F+G-FNW-GNW)/ABS(F+G)).LE.EPS).OR.(ITR .GE. MAXITR)) THEN
+c     terminate, clean L and save additional outputs
+         ALPHA = FNW 
+         EPS = (F + G - FNW - GNW) / ABS(F+FNW)   
+         MAXITR = ITR
+         GOTO 900 
+      ENDIF  
+c     update value of objective function and repeat
+      F = FNW
+      G = GNW
+      GOTO 500
+ 900  CONTINUE
+      RETURN
+c     last line of PRXGRDF
+      END
