@@ -8,7 +8,7 @@
 prxgradchol(
   X,
   L = diag(ncol(X)),
-  eps = 0.01,
+  eps = 1e-06,
   alpha = 0.5,
   maxIter = 100,
   lambda = 0,
@@ -19,8 +19,8 @@ cholpath(
   X,
   lambdas = NULL,
   L = diag(ncol(X)),
-  eps = 1e-08,
-  maxIter = 1000,
+  eps = 1e-06,
+  maxIter = 100,
   normalize = TRUE
 )
 }
