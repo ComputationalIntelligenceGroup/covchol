@@ -29,8 +29,6 @@ prxgradcholf <- function(X, L = diag(ncol(X)), eps =  1e-2,
                         maxIter = 100, 
                         lambda = 0, normalize = TRUE) {
 
-  X <- scale(X, center = TRUE, scale = FALSE)
-  
   if (normalize){
     Cor <- stats::cor(X)    
   }else{
@@ -66,8 +64,6 @@ prxgradcholf <- function(X, L = diag(ncol(X)), eps =  1e-2,
 cholpathf <- function(X, lambdas = NULL, L =  diag(ncol(X)),
                      eps = 1e-8, maxIter = 1000, normalize = TRUE){
   alpha <- 0.5
-  
-  X <- scale(X, center = TRUE, scale = FALSE)
 
   if (is.null(lambdas)) {
     p <- ncol(X)
