@@ -158,7 +158,7 @@ c     compute initial objective function
       G = 0
       DO 30 J=1,N-1
          DO 25 I=J+1, N
-            F = F + TMP(I,J)**2
+            F = F + 2*TMP(I,J)**2
             G = G + LAMBDA * ABS(L(I,J))
   25     CONTINUE
          F = F + TMP(J,J)**2
@@ -216,7 +216,7 @@ c     compute FNW, objective function in new L
       GNW = 0
       DO 140 J=1,N - 1
          DO 135 I=J+1, N
-            FNW = FNW + TMP(I,J)**2 
+            FNW = FNW + 2*TMP(I,J)**2 
             GNW = GNW + LAMBDA * ABS(L(I,J))
 c   new - old
             DIFF = DIFF + ((L(I,J) - TMP(J,I)) ** 2) / (2 * STEP) +  
