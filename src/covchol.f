@@ -4,7 +4,7 @@
 c      
 c     internal variables
       INTEGER I,J,ITR
-      DOUBLE PRECISION F,FNEW,TMP(N,N),GRD(N,N), D(N),
+      DOUBLE PRECISION F,FNW,TMP(N,N),GRD(N,N), D(N),
      *                 ONE, TWO, ZERO, STEP, DIFF, G, GNW
       ITR = 0
       ONE = 1.0
@@ -61,13 +61,13 @@ c     gradient step
             L(I,J) = L(J,I) - STEP * GRD(I,J) 
   100    CONTINUE
             L(J,J) = D(J) - STEP * GRD(J,J)
-            IF (L(J,J) .LT. 0) THEN
+            IF (L(J,J) .LE. 0) THEN
                    STEP = STEP * ALPHA
                    GOTO 600 
             ENDIF
   110 CONTINUE
             L(N,N) = D(N) - STEP * GRD(N,N)
-            IF (L(N,N) .LT. 0) THEN
+            IF (L(N,N) .LE. 0) THEN
                    STEP = STEP * ALPHA
                    GOTO 600 
             ENDIF
@@ -110,10 +110,10 @@ c     line search with descent condition
          GOTO 600
       ENDIF
 c     check stopping criteria
-      IF (( ((F+G-FNW-GNW)/ABS(F+G)).LE.EPS).OR.(ITR .GE. MAXITR)) THEN
+      IF ((( F+G-FNW-GNW).LE.EPS).OR.(ITR .GE. MAXITR)) THEN
 c     terminate, clean L and save additional outputs
          ALPHA = FNW 
-         EPS = (F + G - FNW - GNW) / ABS(F+FNW)   
+         EPS = (F + G - FNW - GNW)    
          MAXITR = ITR
          DO 180 J=1,N-1
             DO 170 I =J + 1,N
@@ -137,7 +137,7 @@ c
 c      
 c     internal variables
       INTEGER I,J,ITR
-      DOUBLE PRECISION F,FNEW,TMP(N,N),GRD(N,N), D(N), MONE,
+      DOUBLE PRECISION F,FNW,TMP(N,N),GRD(N,N), D(N), MONE,
      *                 ONE, TWO, ZERO, STEP, DIFF, G, GNW
       ITR = 0
       ONE = 1.0
@@ -186,13 +186,13 @@ c     gradient step
             L(I,J) = TMP(J,I) - STEP * GRD(I,J) 
   100    CONTINUE
             L(J,J) = D(J) - STEP * GRD(J,J)
-            IF (L(J,J) .LT. 0) THEN
+            IF (L(J,J) .LE. 0) THEN
                    STEP = STEP * ALPHA
                    GOTO 600 
             ENDIF
   110 CONTINUE
             L(N,N) = D(N) - STEP * GRD(N,N)
-            IF (L(N,N) .LT. 0) THEN
+            IF (L(N,N) .LE. 0) THEN
                    STEP = STEP * ALPHA
                    GOTO 600 
             ENDIF
@@ -235,10 +235,10 @@ c     line search with descent condition
          GOTO 600
       ENDIF
 c     check stopping criteria
-      IF (( ((F+G-FNW-GNW)/ABS(F+G)).LE.EPS).OR.(ITR .GE. MAXITR)) THEN
+      IF (((F+G-FNW-GNW).LE.EPS).OR.(ITR .GE. MAXITR)) THEN
 c     terminate, clean L and save additional outputs
          ALPHA = FNW 
-         EPS = (F + G - FNW - GNW) / ABS(F+FNW)   
+         EPS = (F + G - FNW - GNW)  
          MAXITR = ITR
          GOTO 900 
       ENDIF  
